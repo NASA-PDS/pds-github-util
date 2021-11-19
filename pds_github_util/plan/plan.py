@@ -26,7 +26,7 @@ REPO_INFO = ('\n--------\n\n'
              '   * - `User Guide <{}>`_\n'
              '     - `Github Repo <{}>`_\n'
              '     - `Issue Tracking <{}/issues>`_ \n'
-             '     - `Backlog <{}/issues?q=is%3Aopen+is%3Aissue+label%3Abacklog>`_ \n'
+             '     - `Backlog <{}/issues?q=is%3Aopen+is%3Aissue+label%3Aicebox>`_ \n'
              '     - `Stable Release <{}/releases/latest>`_ \n'
              '     - `Dev Release <{}/releases>`_ \n\n')
 
@@ -60,18 +60,6 @@ def main():
                         help='zenhub API token')
     parser.add_argument('--build_number',
                         help='build number',
-                        required=True)
-    parser.add_argument('--delivery_date',
-                        help='EN delivery to I&T date',
-                        required=True)
-    parser.add_argument('--trr_date',
-                        help='EN TRR date',
-                        required=True)
-    parser.add_argument('--ddr_date',
-                        help='EN DDR date',
-                        required=True)
-    parser.add_argument('--release_date',
-                        help='EN DDR date',
                         required=True)
     parser.add_argument('--projects_config',
                         help='Path to config file with project information',
