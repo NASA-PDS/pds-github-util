@@ -93,8 +93,12 @@ Generates `pdsen_issues.rst`
 
 For RD metrics:
 
-    pds-issues --issue_state closed --format metrics --start-time 2020-10-26T00:00:00+00:00 --end-time 2021-04-19T00:00:00+00:00
+    pds-issues --issue_state closed --format metrics --start-time 2020-04-19T00:00:00+00:00 --end-time 2021-10-31T00:00:00+00:00
 
+Move issues from one obsolete repository to a new one:
+
+     move-issues --source-repo NASA-PDS/api-search-query-lexer --target-repo NASA-PDS/registry-api --label lexer
+    
 
 # Milestones
 

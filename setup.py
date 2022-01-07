@@ -58,6 +58,7 @@ setuptools.setup(
                             'release-plan=pds_github_util.plan.plan:main',
                             'milestones=pds_github_util.milestones.milestones:main',
                             'pds-issues=pds_github_util.issues.issues:main',
+                            'move-issues=pds_github_util.issues.move_issues:main',
                             'pds-labels=pds_github_util.issues.labels:main'
                             ],
     },
