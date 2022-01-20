@@ -74,6 +74,7 @@ def move_issue(issue, target_repository, label=None, dry_run=False):
             **optional_args)
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         if issue.state != 'closed':
             issue.close()
     else:
@@ -90,13 +91,16 @@ def move_issues(source_repo, target_repo, gh_connection, label=None, dry_run=Tru
     owner, repo_name = target_repo.split("/")
 =======
 =======
+=======
+        if issue.state != 'closed':
+            issue.close()
+>>>>>>> now dry_run=True does not close the issues of the source repository
     else:
         # Dry run so don't take action but show what would happen
         logger.info('Moving issue «%s» to %s/%s', issue.title, target_repository.owner, target_repository.name)
 >>>>>>> updates after peer review
 
-    if issue.state != 'closed':
-        issue.close()
+
 
 
 def move_issues(source_repo, target_repo, gh_connection, label=None, dry_run=True):
