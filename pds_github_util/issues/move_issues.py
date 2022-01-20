@@ -6,6 +6,7 @@ import github3
 from datetime import datetime
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 # Quiet github3 logging
@@ -13,6 +14,8 @@ logger = logging.getLogger('github3')
 logger.setLevel(level=logging.WARNING)
 
 >>>>>>> add script to move issue from one repository to another
+=======
+>>>>>>> updates after peer review
 # Enable logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -70,6 +73,7 @@ def move_issue(issue, target_repository, label=None, dry_run=False):
             issue.created_at.isoformat(),
             **optional_args)
 <<<<<<< HEAD
+<<<<<<< HEAD
         if issue.state != 'closed':
             issue.close()
     else:
@@ -85,17 +89,26 @@ def move_issues(source_repo, target_repo, gh_connection, label=None, dry_run=Tru
 
     owner, repo_name = target_repo.split("/")
 =======
+=======
+    else:
+        # Dry run so don't take action but show what would happen
+        logger.info('Moving issue «%s» to %s/%s', issue.title, target_repository.owner, target_repository.name)
+>>>>>>> updates after peer review
 
     if issue.state != 'closed':
         issue.close()
 
 
 def move_issues(source_repo, target_repo, gh_connection, label=None, dry_run=True):
-    [owner, repo_name] = source_repo.split("/")
+    owner, repo_name = source_repo.split("/")
     source_repository = gh_connection.repository(owner, repo_name)
 
+<<<<<<< HEAD
     [owner, repo_name] = target_repo.split("/")
 >>>>>>> add script to move issue from one repository to another
+=======
+    owner, repo_name = target_repo.split("/")
+>>>>>>> updates after peer review
     target_repository = gh_connection.repository(owner, repo_name)
 
     pull_request_numbers = []
