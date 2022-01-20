@@ -61,12 +61,13 @@ def move_issue(issue, target_repository, label=None, dry_run=False):
             issue.body,
             issue.created_at.isoformat(),
             **optional_args)
+        if issue.state != 'closed':
+            issue.close()
     else:
         # Dry run so don't take action but show what would happen
         logger.info('Moving issue «%s» to %s/%s', issue.title, target_repository.owner, target_repository.name)
 
-    if issue.state != 'closed':
-        issue.close()
+
 
 
 def move_issues(source_repo, target_repo, gh_connection, label=None, dry_run=True):
