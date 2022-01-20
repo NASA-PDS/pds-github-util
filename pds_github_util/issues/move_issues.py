@@ -5,11 +5,6 @@ import logging
 import github3
 from datetime import datetime
 
-
-# Quiet github3 logging
-logger = logging.getLogger('github3')
-logger.setLevel(level=logging.WARNING)
-
 # Enable logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,16 +61,19 @@ def move_issue(issue, target_repository, label=None, dry_run=False):
             issue.body,
             issue.created_at.isoformat(),
             **optional_args)
+    else:
+        # Dry run so don't take action but show what would happen
+        logger.info('Moving issue «%s» to %s/%s', issue.title, target_repository.owner, target_repository.name)
 
     if issue.state != 'closed':
         issue.close()
 
 
 def move_issues(source_repo, target_repo, gh_connection, label=None, dry_run=True):
-    [owner, repo_name] = source_repo.split("/")
+    owner, repo_name = source_repo.split("/")
     source_repository = gh_connection.repository(owner, repo_name)
 
-    [owner, repo_name] = target_repo.split("/")
+    owner, repo_name = target_repo.split("/")
     target_repository = gh_connection.repository(owner, repo_name)
 
     pull_request_numbers = []
