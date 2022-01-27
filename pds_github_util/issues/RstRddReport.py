@@ -342,7 +342,11 @@ class RstRddReport(RddReport):
         )
         swg_repo = self._gh.repository(self._org, RstRddReport.SWG_REPO_NAME)
 
-        change_requests = swg_repo.issues(state='closed', labels=','.join(['change-request', self._build]))
+        labels = ['change-request']
+        if self._build:
+            labels.append(self._build)
+
+        change_requests = swg_repo.issues(state='closed', labels=','.join(labels))
 
         columns = ["Issue", "Title", "Rationale"]
         data = []
