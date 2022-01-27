@@ -90,17 +90,17 @@ class RddReport:
         for t in RstRddReport.ISSUE_TYPES:
             issues[t] = []
 
-            if self._start_time:
-                self._logger.info("get %s issues from start time %s on ", t,  self._start_time)
-                type_issues = repo.issues(state=state, labels=t, direction='asc', start=self._start_time)
-            else:
-                labels = [t, self._build]
-                self._logger.info("get %s issues for build %s", t, self._build)
-                type_issues = repo.issues(state=state, labels=','.join(labels), direction='asc')
+            labels = [t]
+            if self._build:
+                labels.append(self._build)
+
+            self._logger.info("get %s issues for build %s", t, self._build)
+            type_issues = repo.issues(state=state, labels=','.join(labels), direction='asc')
 
             for issue in type_issues:
                 if not ignore_issue(issue.labels(), ignore_labels=RstRddReport.IGNORED_LABELS) \
-                   and (self._end_time is None or issue.created_at < datetime.fromisoformat(self._end_time)):
+                   and (self._end_time is None or issue.created_at < datetime.fromisoformat(self._end_time))\
+                   and (self._start_time is None or issue.created_at > datetime.fromisoformat(self._start_time)):
                     issues[t].append(issue)
 
         return issues
@@ -285,9 +285,6 @@ class Enhancement(Issue):
         for child in self.children:
             self._logger.info("crawl issue %i", child.issue.number)
             yield from child.crawl()
-
-
-
 
     @staticmethod
     def _get_enhancement_type(issue):
@@ -531,7 +528,6 @@ class RstRddReport(RddReport):
             f'https://nasa-pds.github.io/releases/{self._build}/index.html'
         )
 
-
     def _add_install_and_operation(self):
         self._logger.info("Add installation and operations")
         self._rst_doc.h1('Installation and Operation')
@@ -560,7 +556,6 @@ class RstRddReport(RddReport):
         )
 
         self._rst_doc.newline()
-
 
     def _add_li(self, s):
         self._rst_doc.newline()
@@ -605,14 +600,17 @@ class RstRddReport(RddReport):
             'https://github.com/NASA-PDS/pds-doi-service/blob/master/docs/design/pds-doi-service-srd.md'
         )
 
-
     def _add_introduction(self):
+
         self._logger.info("Add introduction")
         self._rst_doc.content('This release of the PDS4 System is intended as an operational release of the system components to date.')
-        self._rst_doc.content(f'The original plan for this release can be found here: `Plan {self._build}`_')
-        self._rst_doc.newline()
-        self._rst_doc.content('The following sections can be found in this document:')
-        self._rst_doc.hyperlink(f'Plan {self._build}', f'https://nasa-pds.github.io/releases/{self._build[1:]}/plan.html')  # remove B prefix from the build code
+
+        if self._build:
+            self._rst_doc.content(f'The original plan for this release can be found here: `plan {self._build}`_')
+            self._rst_doc.newline()
+            self._rst_doc.content('The following sections can be found in this document:')
+            self._rst_doc.hyperlink(f'plan {self._build}', f'https://nasa-pds.github.io/releases/{self._build[1:]}/plan.html')  # remove B prefix from the build code
+
         self._rst_doc.newline()
         self._rst_doc.directive('toctree', fields=[('glob', ''), ('maxdepth', 3)], content='rdd.rst')
         self._rst_doc.newline()
@@ -632,7 +630,11 @@ class RstRddReport(RddReport):
         data = []
 
         repository = self._gh.repository(self._org, IM_REPO)
-        labels = ['pending-scr', self._build]
+
+        labels = ['pending-scr']
+        if self._build:
+            labels.append(self._build)
+
         for issue in repository.issues(state='closed', labels=','.join(labels), direction='asc', since=self._start_time):
             self._rst_doc.hyperlink(f'{IM_REPO}#{issue.number}', issue.html_url)
             data.append([f'`{IM_REPO}#{issue.number}`_'.replace('|', ''), issue.title])

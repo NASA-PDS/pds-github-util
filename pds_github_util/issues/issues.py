@@ -79,7 +79,7 @@ def main():
     parser.add_argument('--format', default='md',
                         help='rst or md or metrics')
 
-    parser.add_argument('--build', default='B11.1',
+    parser.add_argument('--build', default=None,
                         help='build label, for example B11.1 or B12.0')
 
     args = parser.parse_args()
