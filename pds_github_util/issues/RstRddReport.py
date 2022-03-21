@@ -70,6 +70,7 @@ class RddReport:
         self._start_time = start_time
         self._end_time = end_time
         self._build = build
+        self._target_build = build.replace('-SNAPSHOT', '')
         self._rst_doc = RstClothReferenceable()
 
         self._rst_doc.title(title)
@@ -161,7 +162,7 @@ class MetricsRddReport(RddReport):
     def _non_bug_metrics(self, type, repo):
         for issue in repo.issues(
                 state='closed',
-                labels=f'{self._build},{type}',
+                labels=f'{self._target_build},{type}',
                 direction='asc',
                 since=self._start_time
         ):
@@ -172,7 +173,7 @@ class MetricsRddReport(RddReport):
     def _bug_metrics(self, repo):
         for issue in repo.issues(
                 state='all',
-                labels=f'{self._build},bug',
+                labels=f'{self._target_build},bug',
                 direction='asc',
                 since=self._start_time
         ):
@@ -208,7 +209,7 @@ class MetricsRddReport(RddReport):
 
     def _get_epics_count(self, repo):
 
-        epics = repo.issues(state='closed', labels=f'{self._build},Epic')
+        epics = repo.issues(state='closed', labels=f'{self._target_build},Epic')
         n = 0
 
         for _ in epics:
@@ -230,7 +231,7 @@ class MetricsRddReport(RddReport):
                 self._non_bug_metrics(t, repo)
 
     def add_repo(self, repo):
-        self._logger.info("add repo %s", repo)
+        self._logger.debug("add repo %s", repo)
         self._get_issue_type_count(repo)
 
 
@@ -240,15 +241,15 @@ class EpicFactory:
         self._logger = logger
 
     def create_enhancement(self, repo, gh_issue, build):
-        self._logger.info('Create enhancement for repo %s for issue %i', repo.name, gh_issue.number)
+        self._logger.debug('Create enhancement for repo %s for issue %i', repo.name, gh_issue.number)
 
         enhancement = Enhancement(gh_issue, log=self._logger)
-        self._logger.info(enhancement.type.value)
+        self._logger.debug(enhancement.type.value)
         if enhancement.type.value == EnhancementTypes.THEME.value \
                 or enhancement.type.value == EnhancementTypes.EPIC.value:  # not leaf in the tree
-            self._logger.info("search for epic children")
+            self._logger.debug("search for epic children")
             epic_child_issues = self._zenhub.get_epic_data(repo.id, gh_issue.number)
-            self._logger.info(epic_child_issues)
+            self._logger.debug(epic_child_issues)
             for issue in epic_child_issues['issues']:
                 if issue['repo_id'] == repo.id:
                     self._logger.debug("github api request, get issue %i", issue['issue_number'])
@@ -273,17 +274,17 @@ class Enhancement(Issue):
     def __init__(self, issue, log=None):
         if log:
             self._logger = log
-            log.info("Create enhancement for issue %i", issue.number)
+            log.debug("Create enhancement for issue %i", issue.number)
 
         self.issue = issue
         self.children = []
         self.type = Enhancement._get_enhancement_type(issue)
 
     def crawl(self):
-        self._logger.info("yield issue %i", self.issue.number)
+        self._logger.debug("yield issue %i", self.issue.number)
         yield self
         for child in self.children:
-            self._logger.info("crawl issue %i", child.issue.number)
+            self._logger.debug("crawl issue %i", child.issue.number)
             yield from child.crawl()
 
     @staticmethod
@@ -292,7 +293,6 @@ class Enhancement(Issue):
         for label in issue.labels():
             if label.name in {item.value for item in EnhancementTypes}:
                 enhancement_type = EnhancementTypes(label.name)
-                print(label.name, enhancement_type.value)
                 break
 
         return enhancement_type
@@ -323,7 +323,7 @@ class RstRddReport(RddReport):
                          build=build,
                          token=token)
 
-        self._rst_doc = RstClothReferenceable()
+        self._rst_doc = RstClothReferenceable(line_width=120)
         self._rst_doc.title(title)
 
         if RstRddReport.ZENHUB_TOKEN not in os.environ.keys():
@@ -338,7 +338,7 @@ class RstRddReport(RddReport):
             "Getting change requests from %s/%s for build %s",
             self._org,
             RstRddReport.SWG_REPO_NAME,
-            self._build
+            self._target_build
         )
         swg_repo = self._gh.repository(self._org, RstRddReport.SWG_REPO_NAME)
 
@@ -371,11 +371,12 @@ class RstRddReport(RddReport):
         self._rst_doc._add(repo_info)
 
     def _get_theme_trees(self, repo):
-        labels = [self.THEME, self._build]
+        labels = [self.THEME, self._target_build]
+        # TODO check if we want to see all themes or only the closed one
         theme_issues = repo.issues(state='all', labels=','.join(labels), direction='asc')
         theme_trees = []
         for theme_issue in theme_issues:
-            theme = EpicFactory(self._zenhub, self._logger).create_enhancement(repo, theme_issue, self._build)
+            theme = EpicFactory(self._zenhub, self._logger).create_enhancement(repo, theme_issue, self._target_build)
             theme_trees.append(theme)
         return theme_trees
 
@@ -390,7 +391,7 @@ class RstRddReport(RddReport):
         if issue_count:
             self._rst_doc.content("--------")
             self._rst_doc.newline()
-            self._rst_doc.h2(repo.name)
+            self._rst_doc.h2(repo.name.capitalize())
             self._add_repo_description(repo)
             planned_tickets = self._add_planned_updates(repo)
             self._add_other_updates(repo, issue_map, ignore_tickets=planned_tickets)
@@ -409,14 +410,16 @@ class RstRddReport(RddReport):
                     self._add_rst_repo_change_sub_section(repo, issue_type, issues, ignore_tickets=ignore_tickets)
 
     def _flush_theme_updates(self, theme_line, ticket_lines):
-        empty_suffix = "" if ticket_lines else " (no parent epic in this repository)"
+        empty_suffix = "" if ticket_lines else " (this theme has not epics in this repository)"
         theme_line = theme_line + empty_suffix
         self._rst_doc.li(theme_line)
         if ticket_lines:
             columns = ["Issue", "I&T", "Level", "Priority / Bug Severity"]
             self._rst_doc.table(
                 columns,
-                data=ticket_lines)
+                data=ticket_lines,
+                indent=4
+            )
 
         self._rst_doc.newline()
 
@@ -450,14 +453,19 @@ class RstRddReport(RddReport):
             for enhancement in theme_crawler:
                 issue = enhancement.issue
                 if not ignore_issue(issue.labels(), ignore_labels=RstRddReport.IGNORED_LABELS):
-                    self._logger.info("crawl theme tree %i", issue.number)
+                    self._logger.debug("crawl theme tree %i", issue.number)
                     self._rst_doc.hyperlink(f'{repo.name}#{issue.number}', issue.html_url)
                     i_and_t = '|iandt|' if RstRddReport._is_tested(issue) else ''
+                    priority = get_issue_priority(issue)
                     data.append([f'`{repo.name}#{issue.number}`_ {issue.title}'.replace('|', ''),
                                  i_and_t,
                                  enhancement.type.value,
-                                 get_issue_priority(issue)])
-                    planned_tickets.add(issue.number)
+                                 priority
+                                 ])
+                    if enhancement.type.value == 'requirement' and priority == 'unknown':
+                        self._log_missing_priority(repo.name, issue.number)
+
+                    planned_tickets.add(issue)
 
             self._flush_theme_updates(theme_head, data)
             done = True
@@ -480,16 +488,23 @@ class RstRddReport(RddReport):
             if issue.number not in ignore_tickets:
                 i_and_t = '|iandt|' if RstRddReport._is_tested(issue) else ''
                 self._rst_doc.hyperlink(f'{repo.name}#{issue.number}', issue.html_url)
+                priority = get_issue_priority(issue)
                 data.append([f'`{repo.name}#{issue.number}`_ {issue.title}'.replace('|', ''),
                              i_and_t,
-                             get_issue_priority(issue)])
-
+                             priority])
+                if type in {'bug', 'requirement'} and priority == 'unknown':
+                    self._log_missing_priority(repo.name, issue.number)
         if data:
             self._rst_doc.h4(type.capitalize() + 's')
             columns = ["Issue", "I&T", "Priority / Bug Severity"]
             self._rst_doc.table(
                 columns,
-                data=data)
+                data=data
+            )
+
+    def _log_missing_priority(self, repo_name, issue_number):
+        self._logger.warning('%s#%d misses priority', repo_name, issue_number)
+        self._logger.info('update at https://github.com/NASA-PDS/%s/issues/%d', repo_name, issue_number)
 
     def _add_software_changes(self, repos):
         self._logger.info("Add software changes")
@@ -529,7 +544,7 @@ class RstRddReport(RddReport):
         self._rst_doc.newline()
         self._rst_doc.hyperlink(
             f'Software Release Summary ({self._build})',
-            f'https://nasa-pds.github.io/releases/{self._build}/index.html'
+            f'https://nasa-pds.github.io/releases/{self._build[1:]}/index.html'
         )
 
     def _add_install_and_operation(self):
@@ -613,7 +628,7 @@ class RstRddReport(RddReport):
             self._rst_doc.content(f'The original plan for this release can be found here: `plan {self._build}`_')
             self._rst_doc.newline()
             self._rst_doc.content('The following sections can be found in this document:')
-            self._rst_doc.hyperlink(f'plan {self._build}', f'https://nasa-pds.github.io/releases/{self._build[1:]}/plan.html')  # remove B prefix from the build code
+            self._rst_doc.hyperlink(f'plan {self._target_build}', f'https://nasa-pds.github.io/releases/{self._build[1:]}/plan.html')  # remove B prefix from the build code
 
         self._rst_doc.newline()
         self._rst_doc.directive('toctree', fields=[('glob', ''), ('maxdepth', 3)], content='rdd.rst')
@@ -636,8 +651,8 @@ class RstRddReport(RddReport):
         repository = self._gh.repository(self._org, IM_REPO)
 
         labels = ['pending-scr']
-        if self._build:
-            labels.append(self._build)
+        if self._target_build:
+            labels.append(self._target_build)
 
         for issue in repository.issues(state='closed', labels=','.join(labels), direction='asc', since=self._start_time):
             self._rst_doc.hyperlink(f'{IM_REPO}#{issue.number}', issue.html_url)

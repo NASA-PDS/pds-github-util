@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 def _indent(content, indent):
     """
+
     :param content:
     :param indent:
     :return:
@@ -18,7 +19,8 @@ def _indent(content, indent):
         if isinstance(content, list):
             return ["".join([indent, line]) for line in content]
         else:
-            return "".join([indent, content])
+            content_lines = content.split('\n')
+            return f"\n{indent}".join(content_lines)
 
 
 class RstClothReferenceable(RstCloth):
