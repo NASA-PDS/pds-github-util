@@ -1,11 +1,11 @@
 import os
 import logging
-from rstcloth import RstCloth
+import rstcloth
 
 logger = logging.getLogger(__name__)
 
 
-def _indent(content, indent):
+def _indent_ok_for_table(content, indent):
     """
 
     :param content:
@@ -18,12 +18,19 @@ def _indent(content, indent):
         indent = " " * indent
         if isinstance(content, list):
             return ["".join([indent, line]) for line in content]
-        else:
+        elif '\n' in content:
             content_lines = content.split('\n')
             return f"\n{indent}".join(content_lines)
+        else:
+            return "".join([indent, content])
+
+# hacky rewirting of the function used in the rstpackage
+# should do a pull request eventually
+rstcloth.rstcloth._indent = _indent_ok_for_table
+_indent = _indent_ok_for_table
 
 
-class RstClothReferenceable(RstCloth):
+class RstClothReferenceable(rstcloth.RstCloth):
     def __init__(self, line_width=72):
         super().__init__(line_width=line_width)
         self._deffered_directives = []
@@ -83,3 +90,4 @@ class RstClothReferenceable(RstCloth):
             f.write("\n")
             f.write("\n".join(self._deffered_directives))
             f.write("\n")
+
