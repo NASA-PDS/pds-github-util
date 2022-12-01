@@ -139,7 +139,7 @@ class MetricsRddReport(RddReport):
         self.bugs_open_closed = {}
         self.bugs_severity = {}
 
-        self.high_and_critical_open_bugs = ""
+        self.open_bugs = {}
 
         self.epic_closed_for_the_build = {}
 
@@ -158,7 +158,9 @@ class MetricsRddReport(RddReport):
         print(self.bugs_severity)
 
         print('Open High/Critical Bugs')
-        print(self.high_and_critical_open_bugs)
+        for s,bugs in self.open_bugs.items():
+            print(s)
+            print(bugs)
 
         print('Closed Epics')
         print(self.epic_closed_for_the_build)
@@ -200,9 +202,11 @@ class MetricsRddReport(RddReport):
                 else:
                     self.bugs_open_closed[issue.state] = 1
 
-                if issue.state == 'open' and severity in {'s.critical', 's.high'}:
+                if issue.state == 'open' and severity in {'s.critical', 's.high', 's.medium', 's.low'}:
                     self._logger.info("%s#%i %s %s %s", repo, issue.number, issue.title, severity, issue.state)
-                    self.high_and_critical_open_bugs += "%s#%i %s %s\n" % (repo, issue.number, issue.title, severity)
+                    if severity not in self.open_bugs:
+                        self.open_bugs[severity] = ""
+                    self.open_bugs[severity] += "%s#%i %s\n" % (repo, issue.number, issue.title)
 
 
                 # get count

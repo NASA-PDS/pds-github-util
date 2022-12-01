@@ -100,7 +100,26 @@ For TRR/DDR metrics:
 Move issues from one obsolete repository to a new one:
 
      move-issues --source-repo NASA-PDS/api-search-query-lexer --target-repo NASA-PDS/registry-api --label lexer
-    
+
+# SLOC reports
+
+## SLOC updates
+
+This is very manual so far,but the process is:
+
+1. clone the repository, for example:
+
+    cd /path/
+    git clone https://github.com/NASA-PDS/registry-api.git
+
+2. Identify the tag range where which you want to report updated SLOC, you can get the versions from the software summaries, see for example [build 13.0 component versions](https://nasa-pds.github.io/releases/13.0/) and [build 12.1 component versions](https://nasa-pds.github.io/releases/12.1/)
+
+As a note you should switch the lower tag patch version to 0 since . build are done during the build period on which we report.
+
+3. launch the report 
+
+    python ./pds_github_util/sloc/repo_sloc.py --repo-path /path/registry-api --tag-range v1.1.10...v1.0.0
+
 
 # Milestones
 
