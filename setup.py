@@ -1,4 +1,3 @@
-import re
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -31,19 +30,19 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        "github3.py>=3.2.0",
-        "lxml>=4.5",
-        "mdutils>=1.2",
-        "packaging>=21.9",
-        "markdown2==2.4.3",
-        "jinja2==3.1.2",
-        "emoji==2.0.0",
-        "gitpython==3.1.27",
-        "requests==2.28.1",
-        "beautifulsoup4==4.9.0",
-        "rstcloth==0.4.0",
+        "github3.py==1.3.0",      # Do not change this version without also changing it in github-actions-base
+        "lxml==4.6.3",            # Do not change this version without also changing it in github-actions-base
+        "mdutils~=1.2.2",
+        "packaging==21.0",        # Do not change this version without also changing it in roundup-action
+        "markdown2~=2.4.3",
+        "jinja2<3.1",             # Do not change: Jinja2 ≥ 3.1 incompatible with Sphinx ≅ 3.2.1
+        "emoji~=2.0.0",
+        "gitpython~=3.1.27",
+        "requests==2.23.0",       # Do not change this version without also changing it in github-actions-base
+        "beautifulsoup4~=4.9.0",
+        "rstcloth~=0.4.0",
         "pyyaml==6.0",
-        "pyzenhub==0.3.1"
+        "pyzenhub~=0.3.1"
     ],
     entry_points={
         # snapshot-release for backward compatibility
