@@ -82,6 +82,10 @@ def main():
     parser.add_argument('--build', default=None,
                         help='build label, for example B11.1 or B12.0')
 
+    parser.add_argument('--loglevel', choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'],
+                        default='INFO',
+                        help='Set the root logger level to the specified level.')
+
     args = parser.parse_args()
     logging.basicConfig(level=args.loglevel, format="%(levelname)s %(message)s")
 
