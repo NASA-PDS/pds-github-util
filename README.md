@@ -93,9 +93,13 @@ or for tickets specifically tagged with the Build label (e.g. B11.1)
     pds-issues  --github-repos validate --issue_state closed --format rst --build B11.1
 Generates `pdsen_issues.rst`
 
-For TRR/DDR metrics:
+For TRR/DDR metrics **for specific timeframe**:
 
     pds-issues --issue_state closed --format metrics --start-time 2020-04-19T00:00:00+00:00 --end-time 2021-10-31T00:00:00+00:00
+
+For TRR/DDR metrics **for specific Build** (don't forget the `B` in the build number):
+
+    pds-issues --issue_state closed --format metrics --build B11.1
 
 Move issues from one obsolete repository to a new one:
 
