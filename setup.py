@@ -38,7 +38,7 @@ setuptools.setup(
         "jinja2<3.1",             # Do not change: Jinja2 ≥ 3.1 incompatible with Sphinx ≅ 3.2.1
         "emoji~=2.0.0",
         "gitpython~=3.1.27",
-        "requests==2.23.0",       # Do not change this version without also changing it in github-actions-base
+        "requests==2.32.0",       # Do not change this version without also changing it in github-actions-base
         "beautifulsoup4~=4.9.0",
         "rstcloth~=0.4.0",
         "pyyaml==6.0",
