@@ -31,7 +31,7 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=[
         "github3.py==1.3.0",      # Do not change this version without also changing it in github-actions-base
-        "lxml==4.6.3",            # Do not change this version without also changing it in github-actions-base
+        "lxml==4.9.1",            # Do not change this version without also changing it in github-actions-base
         "mdutils~=1.2.2",
         "packaging==21.0",        # Do not change this version without also changing it in roundup-action
         "markdown2~=2.4.3",
