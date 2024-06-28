@@ -1,5 +1,18 @@
 # PDS Utility Function for GitHub
 
+👉 **Note:** This package is now a public archive and is no longer maintained. It now exists as several _replacement_ packages as follows:
+
+- [lasso-reports](https://github.com/NASA-PDS/lasso-reports) for planning board, summary tables, and the `git-ping` utility
+- [lasso-issues](https://github.com/NASA-PDS/lasso-issues) for creating data structures and reports using the GitHub API
+- [lasso-releasers](https://github.com/NASA-PDS/lasso-releasers) for publication of software to artifact repositories for general availability
+- [lasso-requirements](https://github.com/NASA-PDS/lasso-requirements) for generation of requirements reports
+
+Please submit issue reports, pull requests, and so forth to any of the above repositories rather than this one.
+
+The remainder of this README contains the original text of the `pds-github-util` `README.md` file, preserved for posterity.
+
+---
+
 Enforces the PDS engineering node software lifecycle:
 - publish snapshot releases for python (`python-release --snapshot`) or maven  (`maven-release --snapshot`) projects
 - create requirements reports (`requirement-report`)
